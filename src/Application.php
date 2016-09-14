@@ -28,7 +28,7 @@ class Application extends SymfonyApplication implements ApplicationInterface
      *
      * @var \Speedwork\Container\Container
      */
-    protected $container;
+    protected $app;
 
     /**
      * The output from the previous command.
@@ -40,18 +40,18 @@ class Application extends SymfonyApplication implements ApplicationInterface
     /**
      * Create a new Speedwork console application.
      *
-     * @param \Speedwork\Container\Container $container
+     * @param \Speedwork\Container\Container $app
      * @param string                         $version
      */
-    public function __construct(Container $container, $version = '1.0')
+    public function __construct(Container $app, $version = '1.0')
     {
         parent::__construct('Speedwork Framework', $version);
 
-        $this->container = $container;
+        $this->app = $app;
         $this->setAutoExit(false);
         $this->setCatchExceptions(false);
 
-        $events = $container->get('events');
+        $events = $app->get('events');
         $events->dispatch('console.init.event', new ConsoleEvent($this));
     }
 
@@ -98,7 +98,7 @@ class Application extends SymfonyApplication implements ApplicationInterface
     public function add(SymfonyCommand $command)
     {
         if ($command instanceof Command) {
-            $command->setContainer($this->container);
+            $command->setContainer($this->app);
         }
 
         return $this->addToParent($command);
@@ -189,6 +189,6 @@ class Application extends SymfonyApplication implements ApplicationInterface
      */
     public function getContainer()
     {
-        return $this->container;
+        return $this->app;
     }
 }

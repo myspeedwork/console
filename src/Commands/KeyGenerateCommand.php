@@ -45,7 +45,7 @@ class KeyGenerateCommand extends Command
         // secure random byte generator and is later base64 encoded for storage.
         $this->setKeyInEnvironmentFile($key);
 
-        $this->container['config']['app.key'] = $key;
+        $this->app['config']['app.key'] = $key;
 
         $this->info("Application key [$key] set successfully.");
     }
@@ -59,7 +59,7 @@ class KeyGenerateCommand extends Command
     {
         file_put_contents(
             ABSPATH.'.env', str_replace(
-                'APP_KEY='.$this->container['config']['app.key'],
+                'APP_KEY='.$this->app['config']['app.key'],
                 'APP_KEY='.$key,
                 file_get_contents(ABSPATH.'.env')
             )
@@ -75,7 +75,7 @@ class KeyGenerateCommand extends Command
     {
         return 'base64:'.base64_encode(
             random_bytes(
-                $this->container['config']['app.cipher'] == 'AES-128-CBC' ? 16 : 32
+                $this->app['config']['app.cipher'] == 'AES-128-CBC' ? 16 : 32
             )
         );
     }

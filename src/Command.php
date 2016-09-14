@@ -11,7 +11,8 @@
 
 namespace Speedwork\Console;
 
-use Speedwork\Util\Interfaces\Arrayable;
+use Speedwork\Console\Util\Parser;
+use Speedwork\Core\Interfaces\Arrayable;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
@@ -32,7 +33,7 @@ class Command extends SymfonyCommand
      *
      * @var \Speedwork\Container\Container
      */
-    protected $container;
+    protected $app;
 
     /**
      * The input interface implementation.
@@ -385,9 +386,9 @@ class Command extends SymfonyCommand
     /**
      * Format input to textual table.
      *
-     * @param array                                         $headers
-     * @param \Illuminate\Contracts\Support\Arrayable|array $rows
-     * @param string                                        $style
+     * @param array                                      $headers
+     * @param \Speedwork\Core\Interfaces\Arrayable|array $rows
+     * @param string                                     $style
      */
     public function table(array $headers, $rows, $style = 'default')
     {
@@ -540,16 +541,16 @@ class Command extends SymfonyCommand
      */
     public function getContainer()
     {
-        return $this->container;
+        return $this->app;
     }
 
     /**
      * Set the Container application instance.
      *
-     * @param \Speedwork\Container\Container $container
+     * @param \Speedwork\Container\Container $app
      */
-    public function setContainer($container)
+    public function setContainer($app)
     {
-        $this->container = $container;
+        $this->app = $app;
     }
 }

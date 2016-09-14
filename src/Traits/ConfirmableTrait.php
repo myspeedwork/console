@@ -9,7 +9,7 @@
  * file that was distributed with this source code
  */
 
-namespace Illuminate\Console;
+namespace Speedwork\Console\Traits;
 
 use Closure;
 

@@ -17,6 +17,7 @@ use Speedwork\Console\Application as Console;
 use Speedwork\Core\Application;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
+use Symfony\Component\EventDispatcher\Event;
 use Throwable;
 
 /**
@@ -119,18 +120,16 @@ class Kernel implements KernelInterface
      * @param string  $signature
      * @param Closure $callback
      *
-     * @return \Illuminate\Foundation\Console\ClosureCommand
+     * @return \Speedwork\\Console\ClosureCommand
      */
     public function command($signature, Closure $callback)
     {
         $command = new ClosureCommand($signature, $callback);
 
-        $this->app['events']->addListener(
-            'console.init.event', function ($event) use ($command) {
-                $console = $event->getConsole();
-                $console->add($command);
-            }
-        );
+        $this->app['events']->addListener('console.init.event', function (Event $event) use ($command) {
+            $console = $event->getConsole();
+            $console->add($command);
+        });
 
         return $command;
     }
@@ -194,7 +193,7 @@ class Kernel implements KernelInterface
     /**
      * Get the Artisan application instance.
      *
-     * @return \Illuminate\Console\Application
+     * @return \Speedwork\Console\Application
      */
     protected function getConsole()
     {

@@ -15,6 +15,7 @@ use ReflectionClass;
 use Speedwork\Console\Application as Console;
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
+use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Speedwork Console Service Provider.
@@ -102,10 +103,8 @@ class ConsoleServiceProvider extends ServiceProvider
         // give us the Speedwork console instance which we will give commands to.
         $events = $this->app['events'];
 
-        $events->addListener(
-            'console.init.event', function ($event) use ($commands) {
-                $event->getConsole()->resolveCommands($commands);
-            }
-        );
+        $events->addListener('console.init.event', function (Event $event) use ($commands) {
+            $event->getConsole()->resolveCommands($commands);
+        });
     }
 }
