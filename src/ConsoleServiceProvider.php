@@ -29,7 +29,6 @@ class ConsoleServiceProvider extends ServiceProvider
             'class' => '\\Speedwork\\Console\\Commands\\ServeCommand',
             'args'  => [],
         ],
-
         'console.command.config.cache' => [
             'class' => '\\Speedwork\\Console\\Commands\\ConfigCacheCommand',
             'args'  => ['app.files'],
@@ -37,6 +36,10 @@ class ConsoleServiceProvider extends ServiceProvider
         'console.command.config.clear' => [
             'class' => '\\Speedwork\\Console\\Commands\\ConfigClearCommand',
             'args'  => ['app.files'],
+        ],
+        'console.command.key:generate' => [
+            'class' => '\\Speedwork\\Console\\Commands\\KeyGenerateCommand',
+            'args'  => [],
         ],
     ];
 

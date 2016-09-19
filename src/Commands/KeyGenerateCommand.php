@@ -58,10 +58,10 @@ class KeyGenerateCommand extends Command
     protected function setKeyInEnvironmentFile($key)
     {
         file_put_contents(
-            ABSPATH.'.env', str_replace(
+            $this->app['path.env'], str_replace(
                 'APP_KEY='.$this->app['config']['app.key'],
                 'APP_KEY='.$key,
-                file_get_contents(ABSPATH.'.env')
+                file_get_contents($this->app['path.env'])
             )
         );
     }

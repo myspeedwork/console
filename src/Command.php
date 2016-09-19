@@ -12,7 +12,7 @@
 namespace Speedwork\Console;
 
 use Speedwork\Console\Util\Parser;
-use Speedwork\Core\Interfaces\Arrayable;
+use Speedwork\Core\Interfaces\ArrayableInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
@@ -394,7 +394,7 @@ class Command extends SymfonyCommand
     {
         $table = new Table($this->output);
 
-        if ($rows instanceof Arrayable) {
+        if ($rows instanceof ArrayableInterface) {
             $rows = $rows->toArray();
         }
 

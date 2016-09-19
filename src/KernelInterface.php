@@ -17,6 +17,11 @@ namespace Speedwork\Console;
 interface KernelInterface
 {
     /**
+     * Bootstrap the application for Console requests.
+     */
+    public function bootstrap();
+
+    /**
      * Handle an incoming console command.
      *
      * @param \Symfony\Component\Console\Input\InputInterface   $input
