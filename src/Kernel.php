@@ -14,11 +14,9 @@ namespace Speedwork\Console;
 use Closure;
 use Exception;
 use Speedwork\Console\Application as Console;
-use Speedwork\Core\Application;
+use Speedwork\Core\Application as CoreApplication;
 use Symfony\Component\Console\Application as ConsoleApplication;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
 use Symfony\Component\EventDispatcher\Event;
-use Throwable;
 
 /**
  * @author Sankar <sankar.suda@gmail.com>
@@ -58,7 +56,7 @@ class Kernel implements KernelInterface
      *
      * @param \Speedwork\Core\Application $app
      */
-    public function __construct(Application $app)
+    public function __construct(CoreApplication $app)
     {
         $this->app = $app;
     }
@@ -73,27 +71,15 @@ class Kernel implements KernelInterface
      */
     public function handle($input, $output = null)
     {
-        try {
-            $this->bootstrap();
+        $this->bootstrap();
 
-            if (!$this->commandsLoaded) {
-                $this->commands();
+        if (!$this->commandsLoaded) {
+            $this->commands();
 
-                $this->commandsLoaded = true;
-            }
-
-            return $this->getConsole()->run($input, $output);
-        } catch (Exception $e) {
-            $this->renderException($output, $e);
-
-            return 1;
-        } catch (Throwable $e) {
-            $e = new FatalThrowableError($e);
-
-            $this->renderException($output, $e);
-
-            return 1;
+            $this->commandsLoaded = true;
         }
+
+        return $this->getConsole()->run($input, $output);
     }
 
     /**

@@ -27,19 +27,23 @@ class ConsoleServiceProvider extends ServiceProvider
     protected $commands = [
         'console.command.serve' => [
             'class' => '\\Speedwork\\Console\\Commands\\ServeCommand',
-            'args'  => [],
+            'argv'  => [],
         ],
         'console.command.config.cache' => [
             'class' => '\\Speedwork\\Console\\Commands\\ConfigCacheCommand',
-            'args'  => ['app.files'],
+            'argv'  => ['app.files'],
         ],
         'console.command.config.clear' => [
             'class' => '\\Speedwork\\Console\\Commands\\ConfigClearCommand',
-            'args'  => ['app.files'],
+            'argv'  => ['app.files'],
         ],
         'console.command.key:generate' => [
             'class' => '\\Speedwork\\Console\\Commands\\KeyGenerateCommand',
-            'args'  => [],
+            'argv'  => [],
+        ],
+        'console.command.env' => [
+            'class' => '\\Speedwork\\Console\\Commands\\EnvironmentCommand',
+            'argv'  => [],
         ],
     ];
 
@@ -48,10 +52,14 @@ class ConsoleServiceProvider extends ServiceProvider
         $app['console'] = function ($app) {
             $console = new Console($app);
 
-            $app['events']->dispatch('console.init.event', new ConsoleEvent($this));
+            $app['events']->dispatch('console.init.event', new ConsoleEvent($console));
 
             return $console;
         };
+
+        $app['console.register'] = $app->protect(function ($commands) {
+            $this->registerCommands($commands);
+        });
 
         $this->registerCommands($this->commands);
     }
@@ -61,15 +69,15 @@ class ConsoleServiceProvider extends ServiceProvider
      *
      * @param array $commands
      */
-    protected function registerCommands(array $commands)
+    public function registerCommands(array $commands)
     {
         foreach ($commands as $key => $command) {
             $this->app[$key] = function ($app) use ($command) {
                 $class = new ReflectionClass($command['class']);
-                if (empty($command['args'])) {
+                if (empty($command['argv'])) {
                     return $class->newInstance();
                 } else {
-                    return $class->newInstanceArgs($this->parseArgs($command['args'], $app));
+                    return $class->newInstanceArgs($this->parseArgs($command['argv'], $app));
                 }
             };
         }
@@ -90,24 +98,5 @@ class ConsoleServiceProvider extends ServiceProvider
         }
 
         return $newArgs;
-    }
-
-    /**
-     * Register the package's custom Speedwork commands.
-     *
-     * @param array|mixed $commands
-     */
-    protected function commands($commands)
-    {
-        $commands = is_array($commands) ? $commands : func_get_args();
-
-        // To register the commands with Speedwork, we will grab each of the arguments
-        // passed into the method and listen for Speedwork "start" event which will
-        // give us the Speedwork console instance which we will give commands to.
-        $events = $this->app['events'];
-
-        $events->addListener('console.init.event', function (Event $event) use ($commands) {
-            $event->getConsole()->resolveCommands($commands);
-        });
     }
 }

@@ -126,7 +126,7 @@ class Application extends SymfonyApplication implements ApplicationInterface
     public function resolve($command)
     {
         if (is_string($command)) {
-            if (substr($command, 0, 2) == '//') {
+            if (strpos($command, '\\') !== false) {
                 $command = new $command();
             } else {
                 $command = $this->getContainer()->get($command);

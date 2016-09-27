@@ -13,6 +13,8 @@ namespace Speedwork\Console;
 
 use Speedwork\Console\Util\Parser;
 use Speedwork\Core\Interfaces\ArrayableInterface;
+use Speedwork\Core\Traits\CapsuleManagerTrait;
+use Speedwork\Core\Traits\ResolverTrait;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
@@ -28,12 +30,8 @@ use Symfony\Component\Console\Question\Question;
  */
 class Command extends SymfonyCommand
 {
-    /**
-     * The container application instance.
-     *
-     * @var \Speedwork\Container\Container
-     */
-    protected $app;
+    use CapsuleManagerTrait;
+    use ResolverTrait;
 
     /**
      * The input interface implementation.
@@ -532,25 +530,5 @@ class Command extends SymfonyCommand
     public function getOutput()
     {
         return $this->output;
-    }
-
-    /**
-     * Get the Container application instance.
-     *
-     * @return \Speedwork\Container\Container
-     */
-    public function getContainer()
-    {
-        return $this->app;
-    }
-
-    /**
-     * Set the Container application instance.
-     *
-     * @param \Speedwork\Container\Container $app
-     */
-    public function setContainer($app)
-    {
-        $this->app = $app;
     }
 }

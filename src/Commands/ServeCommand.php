@@ -39,14 +39,12 @@ class ServeCommand extends Command
      */
     public function fire()
     {
-        chdir(ABSPATH);
+        $base = $this->app['path.base'];
+        chdir($base);
 
-        $host = $this->input->getOption('host');
-
-        $port = $this->input->getOption('port');
-
-        $base = ProcessUtils::escapeArgument(ABSPATH);
-
+        $host   = $this->input->getOption('host');
+        $port   = $this->input->getOption('port');
+        $base   = ProcessUtils::escapeArgument($base);
         $binary = ProcessUtils::escapeArgument((new PhpExecutableFinder())->find(false));
 
         $this->info("Speedwork development server started on http://{$host}:{$port}/");
