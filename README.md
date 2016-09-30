@@ -13,11 +13,11 @@
 
 Speed is the name of the command-line interface included with Speedwork. It provides a number of helpful commands for your use while developing your application. It is driven by the powerful Symfony Console component. To view a list of all available Speedwork commands, you may use the `list` command:
 
-    php speed list
+    php ./console list
 
 Every command also includes a "help" screen which displays and describes the command's available arguments and options. To view a help screen, simply precede the name of the command with `help`:
 
-    php speed help serve
+    php ./console help serve
 
 #Contributing
 =============================================

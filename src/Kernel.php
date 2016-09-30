@@ -12,10 +12,8 @@
 namespace Speedwork\Console;
 
 use Closure;
-use Exception;
 use Speedwork\Console\Application as Console;
 use Speedwork\Core\Application as CoreApplication;
-use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -50,6 +48,13 @@ class Kernel implements KernelInterface
      * @var bool
      */
     protected $commandsLoaded = false;
+
+    /**
+     * The bootstrap classes for the application.
+     *
+     * @var array
+     */
+    protected $bootstrappers = [];
 
     /**
      * Create a new console kernel instance.
@@ -90,7 +95,6 @@ class Kernel implements KernelInterface
      */
     public function terminate($input, $status)
     {
-        $this->app->terminate();
     }
 
     /**
@@ -174,6 +178,19 @@ class Kernel implements KernelInterface
      */
     public function bootstrap()
     {
+        $this->app->bootstrap($this->bootStrappers());
+
+        $this->app->boot();
+    }
+
+    /**
+     * Get the bootstrap classes for the application.
+     *
+     * @return array
+     */
+    protected function bootStrappers()
+    {
+        return $this->bootstrappers;
     }
 
     /**
@@ -189,16 +206,5 @@ class Kernel implements KernelInterface
         }
 
         return $this->console;
-    }
-
-    /**
-     * Report the exception to the exception handler.
-     *
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
-     * @param \Exception                                        $e
-     */
-    protected function renderException($output, Exception $e)
-    {
-        (new ConsoleApplication())->renderException($e, $output);
     }
 }
