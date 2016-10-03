@@ -93,8 +93,7 @@ class Parser
         if (Str::contains($token, ' : ')) {
             list($token, $description) = explode(' : ', $token, 2);
 
-            $token = trim($token);
-
+            $token       = trim($token);
             $description = trim($description);
         }
 
@@ -125,8 +124,9 @@ class Parser
 
         if (Str::contains($token, ' : ')) {
             list($token, $description) = explode(' : ', $token);
-            $token                     = trim($token);
-            $description               = trim($description);
+
+            $token       = trim($token);
+            $description = trim($description);
         }
 
         $shortcut = null;

@@ -59,7 +59,7 @@ class ConfigCacheCommand extends Command
         $config = $this->getFreshConfiguration();
 
         $this->files->put(
-            CACHE.'config.php', '<?php return '.var_export($config, true).';'.PHP_EOL
+            $this->app['path.cache'].'config.php', '<?php return '.var_export($config, true).';'.PHP_EOL
         );
 
         $this->info('Configuration cached successfully!');
@@ -72,7 +72,7 @@ class ConfigCacheCommand extends Command
      */
     protected function getFreshConfiguration()
     {
-        $app = include ABSPATH.'/app.php';
+        $app = include $this->app['path.base'].'app.php';
 
         return $app['config']->all();
     }

@@ -54,7 +54,7 @@ class ConfigClearCommand extends Command
      */
     public function fire()
     {
-        $this->files->delete(CACHE.'config.php');
+        $this->files->delete($this->app['path.cache'].'config.php');
 
         $this->info('Configuration cache cleared!');
     }

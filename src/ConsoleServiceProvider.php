@@ -15,7 +15,6 @@ use ReflectionClass;
 use Speedwork\Console\Application as Console;
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
-use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Speedwork Console Service Provider.
@@ -35,6 +34,10 @@ class ConsoleServiceProvider extends ServiceProvider
         ],
         'console.command.config.clear' => [
             'class' => '\\Speedwork\\Console\\Commands\\ConfigClearCommand',
+            'argv'  => ['app.files'],
+        ],
+        'console.command.vendor.publish' => [
+            'class' => '\\Speedwork\\Console\\Commands\\PublishCommand',
             'argv'  => ['app.files'],
         ],
         'console.command.key:generate' => [
