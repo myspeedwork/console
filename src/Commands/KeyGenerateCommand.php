@@ -43,7 +43,7 @@ class KeyGenerateCommand extends Command
         // Next, we will replace the application key in the environment file so it is
         // automatically setup for this developer. This key gets generated using a
         // secure random byte generator and is later base64 encoded for storage.
-        $this->setKeyInEnvironmentFile($key);
+        $this->setInEnvFile('APP_KEY', $key);
 
         $this->app['config']['app.key'] = $key;
 
@@ -54,16 +54,21 @@ class KeyGenerateCommand extends Command
      * Set the application key in the environment file.
      *
      * @param string $key
+     * @param string $value
      */
-    protected function setKeyInEnvironmentFile($key)
+    protected function setInEnvFile($key, $value)
     {
-        file_put_contents(
-            $this->app['path.env'], str_replace(
-                'APP_KEY='.$this->app['config']['app.key'],
-                'APP_KEY='.$key,
-                file_get_contents($this->app['path.env'])
-            )
-        );
+        $env = file_get_contents($this->app['path.env']);
+
+        $pattern = '/'.preg_quote($key).'([^\=]*)\=([^\n]*)/';
+
+        if (preg_match($pattern, $env, $matches)) {
+            file_put_contents($this->app['path.env'],
+                str_replace($matches[0], $key.'='.$value, $env)
+            );
+        } else {
+            file_put_contents($this->app['path.env'], $key.'='.$value."\n", FILE_APPEND);
+        }
     }
 
     /**

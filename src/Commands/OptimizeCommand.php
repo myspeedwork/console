@@ -9,12 +9,13 @@
  * file that was distributed with this source code
  */
 
-namespace Speedwork\Console\Command;
+namespace Speedwork\Console\Commands;
 
 use ClassPreloader\Exceptions\VisitorExceptionInterface;
 use ClassPreloader\Factory;
 use Speedwork\Console\Command;
 use Speedwork\Console\Util\Composer;
+use Speedwork\Filesystem\Filesystem;
 use Symfony\Component\Console\Input\InputOption;
 
 class OptimizeCommand extends Command
@@ -41,15 +42,24 @@ class OptimizeCommand extends Command
     protected $composer;
 
     /**
+     * The filesystem instance.
+     *
+     * @var \Speedwork\Filesystem\Filesystem
+     */
+    protected $files;
+
+    /**
      * Create a new optimize command instance.
      *
      * @param \Speedwork\Console\Util\Composer $composer
+     * @param \Speedwork\Filesystem\Filesystem $files
      */
-    public function __construct(Composer $composer)
+    public function __construct(Composer $composer, Filesystem $files)
     {
         parent::__construct();
 
         $this->composer = $composer;
+        $this->files    = $files;
     }
 
     /**
@@ -65,7 +75,7 @@ class OptimizeCommand extends Command
             $this->composer->dumpOptimized();
         }
 
-        if ($this->option('force') || !$this->laravel['config']['app.debug']) {
+        if ($this->option('force') || $this->app['config']['app.debug'] !== true) {
             $this->info('Compiling common classes');
             $this->compileClasses();
         } else {
@@ -80,7 +90,7 @@ class OptimizeCommand extends Command
     {
         $preloader = (new Factory())->create(['skip' => true]);
 
-        $handle = $preloader->prepareOutput($this->app->getCachedCompilePath());
+        $handle = $preloader->prepareOutput($this->app->getPath('cache').'compiled.php');
 
         foreach ($this->getClassFiles() as $file) {
             try {
@@ -101,15 +111,76 @@ class OptimizeCommand extends Command
     {
         $app = $this->app;
 
-        $core = require __DIR__.'/Optimize/config.php';
-
-        $files = array_merge($core, $app['config']->get('compile.files', []));
+        $files = $this->getCompilePaths();
+        $files = array_merge($files, $app['config']->get('compile.files', []));
 
         foreach ($app['config']->get('compile.providers', []) as $provider) {
             $files = array_merge($files, forward_static_call([$provider, 'compiles']));
         }
 
-        return array_map('realpath', $files);
+        $paths = $this->app->getPath();
+
+        foreach ($files as &$file) {
+            foreach ($paths as $key => $path) {
+                $file = str_replace('{'.$key.'}', $path, $file);
+            }
+        }
+
+        $files = array_map('realpath', $files);
+
+        foreach ($files as $key => $file) {
+            if (!$app['files']->exists($file)) {
+                unset($files[$key]);
+            }
+        }
+
+        return $files;
+    }
+
+    /**
+     * Get the list of files from complile locations.
+     *
+     * @return array
+     */
+    protected function getCompilePaths()
+    {
+        $locations = $this->app['config']->get('compile.locations');
+
+        $paths = $this->app->getPath();
+
+        $files = [];
+
+        foreach ($locations as &$location) {
+            foreach ($paths as $key => $path) {
+                $location = str_replace('{'.$key.'}', $path, $location);
+            }
+
+            $files = array_merge($files, $this->getCompileFiles($location));
+        }
+
+        return $files;
+    }
+
+    protected function getCompileFiles($location)
+    {
+        $files = [];
+        if ($this->files->exists($location)) {
+            $extension = $this->files->extension($location);
+            if ($extension == 'php') {
+                return include $location;
+            }
+
+            $paths = $this->files->get($location);
+            $paths = explode("\n", $paths);
+
+            foreach ($paths as $file) {
+                if (!empty($file) && substr($file, 0, 1) !== '#') {
+                    $files[] = $file;
+                }
+            }
+        }
+
+        return $files;
     }
 
     /**

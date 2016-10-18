@@ -13,6 +13,7 @@ namespace Speedwork\Console;
 
 use ReflectionClass;
 use Speedwork\Console\Application as Console;
+use Speedwork\Console\Util\Composer;
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
 
@@ -48,6 +49,18 @@ class ConsoleServiceProvider extends ServiceProvider
             'class' => '\\Speedwork\\Console\\Commands\\EnvironmentCommand',
             'argv'  => [],
         ],
+        'console.command.optimize' => [
+            'class' => '\\Speedwork\\Console\\Commands\\OptimizeCommand',
+            'argv'  => ['app.composer', 'app.files'],
+        ],
+        'console.command.clear-compiled' => [
+            'class' => '\\Speedwork\\Console\\Commands\\ClearCompiledCommand',
+            'argv'  => [],
+        ],
+        'console.command.offline' => [
+            'class' => '\\Speedwork\\Console\\Commands\\OfflineCommand',
+            'argv'  => [],
+        ],
     ];
 
     public function register(Container $app)
@@ -63,6 +76,10 @@ class ConsoleServiceProvider extends ServiceProvider
         $app['console.register'] = $app->protect(function ($commands) {
             $this->registerCommands($commands);
         });
+
+        $app['composer'] = function ($app) {
+            return new Composer($app['files']);
+        };
 
         $this->registerCommands($this->commands);
     }
@@ -95,6 +112,8 @@ class ConsoleServiceProvider extends ServiceProvider
         foreach ($args as $arg) {
             if (is_string($arg) && substr($arg, 0, 4) == 'app.') {
                 $newArgs[] = $app[substr($arg, 4)];
+            } elseif (is_string($arg) && strpos($arg, '\\') !== false) {
+                $newArgs[] = new $arg();
             } else {
                 $newArgs[] = $arg;
             }
