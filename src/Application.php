@@ -11,7 +11,9 @@
 
 namespace Speedwork\Console;
 
+use ReflectionClass;
 use Speedwork\Container\Container;
+use Speedwork\Util\Collection;
 use Symfony\Component\Console\Application as SymfonyApplication;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -65,7 +67,7 @@ class Application extends SymfonyApplication implements ApplicationInterface
      */
     public function call($command, array $parameters = [])
     {
-        $parameters = collect($parameters)->prepend($command);
+        $parameters = (new Collection($parameters))->prepend($command);
 
         $this->lastOutput = new BufferedOutput();
 
@@ -127,13 +129,54 @@ class Application extends SymfonyApplication implements ApplicationInterface
     {
         if (is_string($command)) {
             if (strpos($command, '\\') !== false) {
-                $command = new $command();
+                $command = $this->getContainer()->make($command);
             } else {
                 $command = $this->getContainer()->get($command);
             }
+        } elseif (is_array($command)) {
+            $command = $this->resolveCommand($command);
         }
 
         return $this->add($command);
+    }
+
+    /**
+     * Register the given command.
+     *
+     * @param array $command
+     */
+    public function resolveCommand($command)
+    {
+        $class = new ReflectionClass($command['class']);
+        if (empty($command['argv'])) {
+            return $class->newInstance();
+        } else {
+            return $class->newInstanceArgs($this->parseArgs($command['argv']));
+        }
+    }
+
+    /**
+     * Parse arguments from command array.
+     *
+     * @param array $args Arguments
+     *
+     * @return array Formated arguments
+     */
+    protected function parseArgs($args)
+    {
+        $newArgs = [];
+
+        foreach ($args as $arg) {
+            if (is_string($arg) && substr($arg, 0, 4) == 'app.') {
+                $newArgs[] = $this->getContainer()->get(substr($arg, 4));
+            } elseif (is_string($arg) && strpos($arg, '\\') !== false) {
+                $newArgs[] = new $arg();
+            } else {
+                $newArgs[] = $arg;
+            }
+        }
+
+        return $newArgs;
     }
 
     /**

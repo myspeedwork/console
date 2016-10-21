@@ -11,7 +11,6 @@
 
 namespace Speedwork\Console;
 
-use ReflectionClass;
 use Speedwork\Console\Application as Console;
 use Speedwork\Console\Util\Composer;
 use Speedwork\Container\Container;
@@ -25,41 +24,17 @@ use Speedwork\Container\ServiceProvider;
 class ConsoleServiceProvider extends ServiceProvider
 {
     protected $commands = [
-        'console.command.serve' => [
-            'class' => '\\Speedwork\\Console\\Commands\\ServeCommand',
-            'argv'  => [],
-        ],
-        'console.command.config.cache' => [
-            'class' => '\\Speedwork\\Console\\Commands\\ConfigCacheCommand',
-            'argv'  => ['app.files'],
-        ],
-        'console.command.config.clear' => [
-            'class' => '\\Speedwork\\Console\\Commands\\ConfigClearCommand',
-            'argv'  => ['app.files'],
-        ],
-        'console.command.vendor.publish' => [
-            'class' => '\\Speedwork\\Console\\Commands\\PublishCommand',
-            'argv'  => ['app.files'],
-        ],
-        'console.command.key:generate' => [
-            'class' => '\\Speedwork\\Console\\Commands\\KeyGenerateCommand',
-            'argv'  => [],
-        ],
-        'console.command.env' => [
-            'class' => '\\Speedwork\\Console\\Commands\\EnvironmentCommand',
-            'argv'  => [],
-        ],
+        \Speedwork\Console\Commands\ServeCommand::class,
+        \Speedwork\Console\Commands\KeyGenerateCommand::class,
+        \Speedwork\Console\Commands\EnvironmentCommand::class,
+        \Speedwork\Console\Commands\ClearCompiledCommand::class,
+        \Speedwork\Console\Commands\OfflineCommand::class,
+        \Speedwork\Console\Commands\ConfigClearCommand::class,
+        \Speedwork\Console\Commands\ConfigCacheCommand::class,
+        \Speedwork\Console\Commands\PublishCommand::class,
         'console.command.optimize' => [
             'class' => '\\Speedwork\\Console\\Commands\\OptimizeCommand',
             'argv'  => ['app.composer', 'app.files'],
-        ],
-        'console.command.clear-compiled' => [
-            'class' => '\\Speedwork\\Console\\Commands\\ClearCompiledCommand',
-            'argv'  => [],
-        ],
-        'console.command.offline' => [
-            'class' => '\\Speedwork\\Console\\Commands\\OfflineCommand',
-            'argv'  => [],
         ],
     ];
 
@@ -74,51 +49,13 @@ class ConsoleServiceProvider extends ServiceProvider
         };
 
         $app['console.register'] = $app->protect(function ($commands) {
-            $this->registerCommands($commands);
+            $this->commands($commands);
         });
 
         $app['composer'] = function ($app) {
             return new Composer($app['files']);
         };
 
-        $this->registerCommands($this->commands);
-    }
-
-    /**
-     * Register the given commands.
-     *
-     * @param array $commands
-     */
-    public function registerCommands(array $commands)
-    {
-        foreach ($commands as $key => $command) {
-            $this->app[$key] = function ($app) use ($command) {
-                $class = new ReflectionClass($command['class']);
-                if (empty($command['argv'])) {
-                    return $class->newInstance();
-                } else {
-                    return $class->newInstanceArgs($this->parseArgs($command['argv'], $app));
-                }
-            };
-        }
-
-        $this->commands(array_keys($commands));
-    }
-
-    protected function parseArgs($args, $app)
-    {
-        $newArgs = [];
-
-        foreach ($args as $arg) {
-            if (is_string($arg) && substr($arg, 0, 4) == 'app.') {
-                $newArgs[] = $app[substr($arg, 4)];
-            } elseif (is_string($arg) && strpos($arg, '\\') !== false) {
-                $newArgs[] = new $arg();
-            } else {
-                $newArgs[] = $arg;
-            }
-        }
-
-        return $newArgs;
+        $this->commands($this->commands);
     }
 }
